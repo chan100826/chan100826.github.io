@@ -222,7 +222,7 @@ for(const e of t)for(const{input:t,output:r}of o)if(t.criteria(e,n)){r.songs.pus
 break}for(const{input:t,output:e}of o)t.sort?e.songs=r().orderBy(e.songs,[t.sort],[t.reverse?"desc":"asc"]):t.reverse&&e.songs.reverse()
 return r()(o).map("output").filter((t=>t.songs.length>0)).value()}},94828:function(t,e,n){"use strict"
 n.d(e,{d8:function(){return i},p_:function(){return o},zD:function(){return r}})
-const o="https://music4.bemuse.ninja/server"
+const o="/server"
 async function r(t,{fetch:e=n.g.fetch}={}){const o=i(t),r=await e(o).then((t=>t.json()))
 if(Array.isArray(r.songs))return r
 if(Array.isArray(r.charts)){const t=o.replace(/[^/]*$/,"")
