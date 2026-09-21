@@ -1,20 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-(function () {
-  var BLOCKED = "https://bam.nr-data.net/1/ad10bfe821?a=5707463&sa=1&pl=1789969400542&v=632.2b17625&t=Unnamed%20Transaction&be=268&fe=613&dc=20&f=%5B%22err%22,%22xhr%22,%22stn%22%5D&perf=%7B%22timing%22:%7B%22of%22:1789969400542,%22n%22:0,%22u%22:242,%22ue%22:243,%22dl%22:247,%22di%22:288,%22ds%22:288,%22de%22:288,%22dc%22:881,%22l%22:881,%22le%22:883,%22f%22:5,%22dn%22:5,%22dne%22:5,%22c%22:5,%22ce%22:5,%22rq%22:12,%22rp%22:232,%22rpe%22:234%7D,%22navigation%22:%7B%22ty%22:1%7D%7D&jsonp=NREUM.setToken"; // 1단계에서 찾은 도메인으로 교체
-  var origFetch = window.fetch;
-  window.fetch = function (input, init) {
-    var url = typeof input === "string" ? input : (input && input.url) || "";
-    if (url.indexOf(BLOCKED) !== -1) {
-      console.warn("[patched] skipping blocked request:", url);
-      return Promise.reject(new Error("blocked domain, skipped"));
-    }
-    return origFetch.apply(this, arguments);
-  };
-})();
-</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <title>Bemuse: BEAT☆MUSIC☆SEQUENCE</title>
@@ -61,7 +47,53 @@
     <div id="scene-root"></div>
     <div id="warp-root"></div>
   </main>
+  <main>
+    <div id="scene-root"></div>
+    <div id="warp-root"></div>
+  </main>
 
+  <script>
+  (function () {
+    // 0. 예전에 등록된 서비스워커/캐시를 강제로 정리 (안 하면 새 index.html이 안 먹힐 수 있음)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        regs.forEach(function (reg) { reg.unregister(); });
+      });
+    }
+    if (window.caches) {
+      caches.keys().then(function (names) {
+        names.forEach(function (name) { caches.delete(name); });
+      });
+    }
+
+    // 1. 막힌 도메인으로 가는 fetch를 가로채서 빈 목록으로 위장
+    var BLOCKED = "bemuse.ninja";
+    var origFetch = window.fetch;
+    window.fetch = function (input, init) {
+      var url = typeof input === "string" ? input : (input && input.url) || "";
+      if (url.indexOf(BLOCKED) !== -1) {
+        console.warn("[patched-fetch] blocked:", url);
+        return Promise.resolve(new Response("[]", {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        }));
+      }
+      return origFetch.apply(this, arguments);
+    };
+
+    // 2. 혹시 XMLHttpRequest를 쓰는 경우까지 대비
+    var origOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (method, url) {
+      if (typeof url === "string" && url.indexOf(BLOCKED) !== -1) {
+        console.warn("[patched-xhr] blocked:", url);
+        arguments[1] = "data:application/json,[]";
+      }
+      return origOpen.apply(this, arguments);
+    };
+  })();
+  </script>
+
+  <!-- BEGIN BOOT SCRIPT --><script>(()=>{...
   <!-- BEGIN BOOT SCRIPT --><script>(()=>{var n,e,t,r={16182:(n,e,t)=>{"use strict"
 t.d(e,{Z:()=>u})
 var r=t(74045),o=t.n(r),i=t(12850),a=t.n(i),s=t(92059),c=t.n(s),l=new URL(t(87357),t.b),d=a()(o()),A=c()(l)
